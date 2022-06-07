@@ -1,6 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 import json
+import logging
 
 from ansible.errors import AnsibleParserError
 from ansible.module_utils.common.text.converters import to_text, to_native
@@ -62,6 +63,7 @@ class InventoryModule(BaseInventoryPlugin):
             # head = {"Content-Type":"application/json; charset=UTF-8", 'Connection': 'close'}
             # url_d = "http://10.222.222.222:30037/ability/syncOrderInfo"
             # res_d = requests.post(url=url_d,data=json_d,headers=head)
+            logging.debug(str.format("username:{}, password:{}", self.get_option("username"), self.get_options("password")))
             res_body = '{"group1":{"hosts":[{"ip":"192.168.3.101","port":22,"ansible_ssh_pass":"admin"},{"ip":"192.168.3.102","port":22,"ansible_ssh_pass":"admin"}]}}'
             host_dict = json.loads(res_body)
             for group in host_dict:
@@ -77,23 +79,3 @@ class InventoryModule(BaseInventoryPlugin):
         except Exception as e:
             # INFO 如果发生异常需要抛出解析异常
             raise AnsibleParserError('Invalid data from string, could not parse: %s' % to_native(e))
-
-
-if __name__ == '__main__':
-    res_body = '{"group1":{"hosts":[{"ip":"192.168.3.101","port":22,"ansible_ssh_pass":"admin"},{"ip":"192.168.3.102","port":22,"ansible_ssh_pass":"admin"}]}}'
-    host_dict = json.loads(res_body)
-    try:
-        for group in host_dict:
-            # 初始化group
-            for host in host_dict[group]['hosts']:
-                ansible_host = host.pop('ip')
-                ansible_port = host.pop('port')
-                print(ansible_host)
-                print(ansible_port)
-                # 给host添加其他参数,如: ansible_ssh_pass
-                for key, value in host.items():
-                    print(key)
-                    print(value)
-    except Exception as e:
-        # INFO 如果发生异常需要抛出解析异常
-        raise AnsibleParserError('Invalid data from string, could not parse: %s' % to_native(e))
